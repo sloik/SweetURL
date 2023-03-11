@@ -28,7 +28,7 @@ final class SweetURLTests: XCTestCase {
             matching: testURL
                 .asRequest
                 .set(method: .post)
-                .set(header: .contentType, value: "appication/json")
+                .set(header: .contentType, value: .applicationJSON)
                 .set(body: try! JSONEncoder().encode( Payload(prop1: "val1", prop2: 42) ))
                 .asCurlCommand!,
             as: .lines
