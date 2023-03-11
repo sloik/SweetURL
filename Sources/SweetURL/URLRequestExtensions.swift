@@ -3,6 +3,31 @@ import Foundation
 public extension URLRequest {
 
     /// Returns a curl command that can be used to reproduce the request.
+    ///
+    /// - Note: This is a very simple implementation that will not work for
+    ///         all requests. But you can create a PR to improve it.
+    ///
+    /// ```swift
+    /// let request = URLRequest(url: URL(string: "https://example.com/api/data")!
+    ///     .asRequest
+    ///     .set(method: .post)
+    ///     .set(header: .contentType, value: .applicationJSON)
+    ///     .set(body: try! JSONEncoder().encode( Payload(prop1: "val1", prop2: 42) ))
+    ///
+    /// let curlCommand = request.asCurlCommand
+    /// 
+    /// print(curlCommand ?? "Failed to generate curl command")
+    /// ```
+    /// Example will print a cURL command string with a caveat that
+    /// strings will be escaped so you will have to sanitise them before
+    /// pasting in to terminal.
+    ///
+    /// ```
+    /// curl 'https://example.com/endpoint?param1=value1&param2=value2' \
+    ///     -X POST \
+    ///     -H 'Content-Type: application/json' \
+    ///     -d '{"prop1":"val1","prop2":42}'
+    /// ```
     var asCurlCommand: String? {
 
         guard let escapedURL = url?.absoluteString.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) else { return nil }
@@ -28,7 +53,6 @@ public extension URLRequest {
         if let bodyData = httpBody, let bodyString = String(data: bodyData, encoding: .utf8) {
             let escapedBody = bodyString.replacingOccurrences(of: "'", with: "'\\''")
             lines.append("   -d '\(escapedBody)'")
-
         }
 
         return lines.joined(separator: " \\\n")
