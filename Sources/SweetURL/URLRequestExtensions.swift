@@ -35,6 +35,8 @@ public extension URLRequest {
 }
 
 public extension URLRequest {
+
+    /// Set the body of the request to the given `Data` object.
     @discardableResult
     func set(body: Data) -> Self {
         var copy = self
@@ -78,6 +80,7 @@ public extension URLRequest {
     }
 
     @discardableResult
+    /// Set the HTTP method of the request.
     func set(method: HTTPMethod) -> Self {
         var copy = self
         copy.httpMethod = method.rawValue
