@@ -90,21 +90,32 @@ public extension URLRequest {
 
 public extension URLRequest {
 
-    enum Header: String {
-        case contentType = "Content-Type"
+    enum Header {
+
+        public enum Key: String {
+            case contentType = "Content-Type"
+        }
+
+        public enum Value: String {
+            case applicationJSON = "application/json"
+        }
     }
 
     @discardableResult
-    func set(header: Header, value: String) -> Self {
+    func set(header: Header.Key, value: Header.Value) -> Self {
+        set(header: header.rawValue, value: value.rawValue)
+    }
+
+    @discardableResult
+    func set(header: String, value: String) -> Self {
         var copy = self
         var headers = copy.allHTTPHeaderFields ?? [:]
 
-        headers[header.rawValue] = value
+        headers[header] = value
 
         copy.allHTTPHeaderFields = headers
         return copy
     }
-
 }
 
 extension URL {
