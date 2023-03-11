@@ -1,6 +1,8 @@
 import Foundation
 
 public extension URLRequest {
+
+    /// Returns a curl command that can be used to reproduce the request.
     var asCurlCommand: String? {
 
         guard let escapedURL = url?.absoluteString.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) else { return nil }
@@ -28,7 +30,6 @@ public extension URLRequest {
             lines.append("   -d '\(escapedBody)'")
 
         }
-
 
         return lines.joined(separator: " \\\n")
     }
@@ -90,22 +91,27 @@ public extension URLRequest {
 
 public extension URLRequest {
 
+    /// Defines HTTP headers
     enum Header {
 
+        /// Defines HTTP header keys
         public enum Key: String {
             case contentType = "Content-Type"
         }
 
+        /// Defines HTTP header values
         public enum Value: String {
             case applicationJSON = "application/json"
         }
     }
 
+    /// Set the HTTP header of the request.
     @discardableResult
     func set(header: Header.Key, value: Header.Value) -> Self {
         set(header: header.rawValue, value: value.rawValue)
     }
 
+    /// Set the HTTP header of the request.
     @discardableResult
     func set(header: String, value: String) -> Self {
         var copy = self
@@ -116,8 +122,4 @@ public extension URLRequest {
         copy.allHTTPHeaderFields = headers
         return copy
     }
-}
-
-extension URL {
-    var asRequest: URLRequest { .init(url: self) }
 }
