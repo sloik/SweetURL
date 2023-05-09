@@ -12,7 +12,11 @@ public extension URL {
     /// // Create a URLRequest using the URL
     /// let request = url.asRequest
     ///     ```
-    var asRequest: URLRequest { self.asRequest(method: URLRequest.HTTPMethod.get ) }
+    var asRequest: URLRequest {
+        var req = URLRequest(url: self)
+        req.httpMethod = URLRequest.HTTPMethod.get.rawValue
+        return req
+    }
 
     /// Creates a `URLRequest` object form url with a given HTTP method.
     /// - Parameter method: HTTP method to use
