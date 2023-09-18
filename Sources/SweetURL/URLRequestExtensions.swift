@@ -121,6 +121,7 @@ public extension URLRequest {
         /// Defines HTTP header keys
         public enum Key: String {
             case contentType = "Content-Type"
+            case authorization = "Authorization"
         }
 
         /// Defines HTTP header values
@@ -133,6 +134,12 @@ public extension URLRequest {
     @discardableResult
     func set(header: Header.Key, value: Header.Value) -> Self {
         set(header: header.rawValue, value: value.rawValue)
+    }
+
+    /// Set the HTTP header of the request.
+    @discardableResult
+    func set(header: Header.Key, value: String) -> Self {
+        set(header: header.rawValue, value: value)
     }
 
     /// Set the HTTP header of the request.
