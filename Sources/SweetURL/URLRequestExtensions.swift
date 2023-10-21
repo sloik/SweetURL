@@ -1,5 +1,8 @@
 import Foundation
 
+import HTTPTypes
+import HTTPTypesFoundation
+
 public extension URLRequest {
 
     /// Returns a curl command that can be used to reproduce the request.
@@ -74,72 +77,31 @@ public extension URLRequest {
 
 public extension URLRequest {
 
-    /// Defines HTTP methods
-    enum HTTPMethod: String {
-        /// Requests a representation of the specified resource.
-        /// It is used to retrieve information from the server.
-        case get = "GET"
-        /// Submits an entity to the specified resource,
-        /// often causing a change in state or side effects on the server.
-        case post = "POST"
-        /// Replaces the target resource with the updated content
-        /// sent in the request payload.
-        case put = "PUT"
-        /// Removes all current representations of the target
-        /// resource given by a URI.
-        case delete = "DELETE"
-        /// Applies partial modifications to a resource.
-        case patch = "PATCH"
-        /// Requests a response identical to a GET request,
-        /// but without the response body.
-        case head = "HEAD"
-        /// Describes the communication options for
-        /// the target resource.
-        case options = "OPTIONS"
-        /// Performs a message loop-back test along the path
-        /// to the target resource.
-        case trace = "TRACE"
-        ///  Establishes a network connection to a server using
-        ///  a specified tunnelling protocol.
-        case connect = "CONNECT"
-    }
-
     @discardableResult
     /// Set the HTTP method of the request.
-    func set(method: HTTPMethod) -> Self {
+    func set(method: HTTPRequest.Method) -> Self {
         var copy = self
         copy.httpMethod = method.rawValue
         return copy
     }
 }
 
+public extension HTTPField {
+    enum Value: String {
+        case applicationJSON = "application/json"
+    }
+}
+
 public extension URLRequest {
 
-    /// Defines HTTP headers
-    enum Header {
-
-        /// Defines HTTP header keys
-        public enum Key: String {
-            case contentType = "Content-Type"
-            case authorization = "Authorization"
-        }
-
-        /// Defines HTTP header values
-        public enum Value: String {
-            case applicationJSON = "application/json"
-        }
+    @discardableResult
+    func set(header: HTTPField.Name, value: HTTPField.Value) -> Self {
+        set(field: HTTPField(name: header, value: value.rawValue))
     }
 
-    /// Set the HTTP header of the request.
     @discardableResult
-    func set(header: Header.Key, value: Header.Value) -> Self {
-        set(header: header.rawValue, value: value.rawValue)
-    }
-
-    /// Set the HTTP header of the request.
-    @discardableResult
-    func set(header: Header.Key, value: String) -> Self {
-        set(header: header.rawValue, value: value)
+    func set(field: HTTPField) -> Self {
+        set(header: field.name.canonicalName, value: field.value)
     }
 
     /// Set the HTTP header of the request.
