@@ -1,6 +1,9 @@
 
 import Foundation
 
+import HTTPTypes
+import HTTPTypesFoundation
+
 public extension URL {
 
     /// `URLRequest` object form url.
@@ -14,9 +17,15 @@ public extension URL {
     ///     ```
     var asRequest: URLRequest {
         var req = URLRequest(url: self)
-        req.httpMethod = URLRequest.HTTPMethod.get.rawValue
+        req.httpMethod = HTTPRequest.Method.get.rawValue
         return req
     }
+
+    /// `URLComponents` object form url.
+    var urlComponents: URLComponents? { URLComponents(url: self, resolvingAgainstBaseURL: false) }
+
+    /// `URLQueryItem` array form url.
+    var queryItems: [URLQueryItem]? { urlComponents?.queryItems }
 
     /// Creates a `URLRequest` object form url with a given HTTP method.
     /// - Parameter method: HTTP method to use
@@ -28,9 +37,30 @@ public extension URL {
     /// // Create a URLRequest using the URL
     /// let request = url.asRequest(method: .post)
     /// ```
-    func asRequest(method: URLRequest.HTTPMethod) -> URLRequest {
+    func asRequest(method: HTTPRequest.Method) -> URLRequest {
         var request = asRequest
         request.httpMethod = method.rawValue
         return request
+    }
+
+    /// Gets all query values matching name.
+    /// - Parameter name: Name of the query parameter that is used as a predicate.
+    /// - Returns: `[String]` with values for given parameters or
+    ///             `.none` where no query parameters match name.
+    ///
+    /// Example:
+    ///
+    /// ```
+    /// let url = URL(string: "https://example.com/endpoint?param3=value3&param3=value3")
+    ///
+    /// url.queryValues("param3") // ["value3", "value3"]
+    ///
+    /// ```
+    func queryValues(_ name: String) -> [String]? {
+        queryItems?
+            .filter { item in
+                item.name == name
+            }
+            .compactMap( \.value )
     }
 }
