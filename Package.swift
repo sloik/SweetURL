@@ -16,7 +16,7 @@ let package = Package(
     dependencies: [
         .package(
             url: "https://github.com/apple/swift-http-types.git",
-            from: "1.0.0"
+            from: "1.0.2"
         ),
         .package(
             url: "https://github.com/pointfreeco/swift-snapshot-testing",
