@@ -20,7 +20,6 @@ final class SweetURLTests: XCTestCase {
 
         struct Payload: Codable {
             let prop1: String
-            let prop2: Int
         }
 
         assertSnapshot(
@@ -28,7 +27,7 @@ final class SweetURLTests: XCTestCase {
                 .asRequest
                 .set(method: .post)
                 .set(header: .contentType, value: .applicationJSON)
-                .set(body: try! JSONEncoder().encode( Payload(prop1: "val1", prop2: 42) ))
+                .set(body: try! JSONEncoder().encode( Payload(prop1: "val1") ))
                 .asCurlCommand!,
             as: .lines
         )

@@ -46,7 +46,12 @@ public extension URLRequest {
             lines.append( "   -X \(method)" )
         }
 
-        if let headers = allHTTPHeaderFields {
+        let sortedHeaders = allHTTPHeaderFields?
+            .sorted(by: { (l: (key: String, value: String), r: (key: String, value: String)) in
+                return l.key > r.key
+        })
+
+        if let headers = sortedHeaders {
             for (key, value) in headers {
                 let escapedValue = value.replacingOccurrences(of: "'", with: "'\\''")
                 lines.append( "   -H '\(key): \(escapedValue)'" )
