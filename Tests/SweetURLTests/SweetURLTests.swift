@@ -33,6 +33,18 @@ final class SweetURLTests: XCTestCase {
         )
     }
 
+    func test_asCurlCommand_keepsAlreadyEncodedURL() throws {
+        let url = try XCTUnwrap(URL(string: "https://e.com/a%20b?q=1#frag"))
+        let curl = try XCTUnwrap(url.asRequest.asCurlCommand)
+        XCTAssertEqual(curl, "curl 'https://e.com/a%20b?q=1#frag'")
+    }
+
+    func test_asCurlCommand_shellEscapesSingleQuote() throws {
+        let url = try XCTUnwrap(URL(string: "https://e.com/it's"))
+        let curl = try XCTUnwrap(url.asRequest.asCurlCommand)
+        XCTAssertEqual(curl, "curl 'https://e.com/it'\\''s'")
+    }
+
     func test_firstQueryItem() throws {
 
         XCTAssertEqual(
