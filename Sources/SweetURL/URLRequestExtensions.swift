@@ -33,7 +33,10 @@ public extension URLRequest {
     /// ```
     var asCurlCommand: String? {
 
-        guard let escapedURL = url?.absoluteString.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) else { return nil }
+        // `absoluteString` is already percent-encoded; encoding it again turned `%20` into
+        // `%2520` and `#frag` into `%23frag`. Only escape `'` for the single-quoted shell string.
+        guard let absolute = url?.absoluteString else { return nil }
+        let escapedURL = absolute.replacingOccurrences(of: "'", with: "'\\''")
 
         var lines: [String] = []
         lines.append(

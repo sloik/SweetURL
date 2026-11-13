@@ -20,7 +20,7 @@ is modelled only as the identity on plain text and escaping of `%` and `#`. `URL
 | `SetMethodOnlyChangesMethod`, `SetBodyOnlyChangesBody` | `set(method:)`, `set(body:)` |
 | `SetHeaderOverwrites`, `SetHeaderPreservesOthers`, `SetHeaderKeepsRest`, `SetHeaderIdempotent`, `SetHeaderLastWins`, `SetHeadersCommuteOnDistinctKeys` | `set(header:value:)` |
 | `SetFieldIsSetHeader` | `set(field:)` delegates to `set(header:value:)` |
-| `CurlStartsWithURL`, `CurlEncodingIdentityOnPlain`, `CurlEscapesPercentAndHash` | first line of `asCurlCommand` (see Findings) |
+| `CurlStartsWithURL`, `CurlEncodingIdentityOnPlain`, `CurlURLVerbatim`, `CurlQuoteShellEscaped` | first line of `asCurlCommand`: the URL as-is, only `'` shell-escaped |
 | `CurlMethodLineIffNotGet` | `-X` line only for non-GET (case-insensitive) |
 | `CurlOneLinePerHeader`, `CurlHeadersDescending` | `-H` lines, sorted by key descending |
 | `CurlBodyLineIffBody`, `CurlBodyIsLast`, `CurlGetPlainHasOneLine` | `-d` line |
@@ -32,12 +32,11 @@ decoding failure of the body (then no `-d` line), shell escaping of `'` in heade
 
 ## Findings
 
-- **`asCurlCommand` double-encodes the URL.** The URL line is
-  `url.absoluteString.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)`. That set
-  does not contain `%` or `#`, so an already-escaped URL is corrupted: verified on macOS with
-  `https://e.com/a%20b?q=1#frag`, which prints `https://e.com/a%2520b?q=1%23frag`. The model
-  records this faithfully (`CurlEscapesPercentAndHash`); the "curl reproduces the request" intent
-  does not hold for such URLs. No Swift change was made. Not checked on Linux Foundation.
+- **Fixed in 0.0.9:** `asCurlCommand` encoded the URL a second time with
+  `addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)`, which escapes `%` and `#`, so
+  `https://e.com/a%20b?q=1#frag` printed as `https://e.com/a%2520b?q=1%23frag`. It now uses
+  `absoluteString` unchanged and only shell-escapes `'`. The old bug is the `legacy_double_encode`
+  mutant (caught by `CurlURLVerbatim`).
 
 ## Non-vacuity
 

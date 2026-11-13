@@ -17,7 +17,7 @@ HKeys   == {"A", "B"}
 HVals   == {"v1", "v2"}
 Absent  == "absent"
 Bodies  == {"nobody", "b1", "b2"}
-Urls    == {"plain", "pct", "hash"}
+Urls    == {"plain", "pct", "hash", "quote"}   \* "quote" = contains a single quote
 Headers == [HKeys -> HVals \cup {Absent}]
 Reqs    == [method : Methods, headers : Headers, body : Bodies, url : Urls]
 
@@ -49,7 +49,12 @@ QueryValues(q, n) == IF q.has THEN [none |-> FALSE, vals |-> QV(q.items, n)]
                      ELSE [none |-> TRUE, vals |-> <<>>]
 
 \* asCurlCommand: lines = url, optional -X, headers sorted by key descending, optional -d
-Enc(u) == IF u = "pct" THEN "pct_escaped" ELSE IF u = "hash" THEN "hash_escaped" ELSE u
+\* 0.0.9: the URL line is absoluteString verbatim; only ' is shell-escaped.
+Enc(u) ==
+  IF Mutant = "legacy_double_encode" /\ u = "pct"  THEN "pct_escaped"    \* pre-0.0.9: %20 -> %2520
+  ELSE IF Mutant = "legacy_double_encode" /\ u = "hash" THEN "hash_escaped"   \* #frag -> %23frag
+  ELSE IF u = "quote" THEN "quote_shell_escaped"
+  ELSE u
 Rank(k) == IF k = "B" THEN 2 ELSE 1   \* string order of the header names: "A" < "B"
 Up(m)  == IF m = "get" THEN "GET" ELSE m
 HLine(r, k) == IF r.headers[k] = Absent THEN <<>>
@@ -95,7 +100,9 @@ SetFieldIsSetHeader == SetField(r, k1, v1) = SetHeader(r, k1, v1)
 
 CurlStartsWithURL == CurlLines(r)[1].kind = "url" /\ CurlLines(r)[1].a = Enc(r.url)
 CurlEncodingIdentityOnPlain == Enc("plain") = "plain"
-CurlEscapesPercentAndHash == Enc("pct") # "pct" /\ Enc("hash") # "hash"
+\* already-encoded URLs pass through unchanged; only a single quote is shell-escaped
+CurlURLVerbatim == r.url # "quote" => CurlLines(r)[1].a = r.url
+CurlQuoteShellEscaped == r.url = "quote" => CurlLines(r)[1].a = "quote_shell_escaped"
 CurlMethodLineIffNotGet ==
   (\E i \in 1..Len(CurlLines(r)) : CurlLines(r)[i].kind = "X") <=> (Up(r.method) # "GET")
 CurlOneLinePerHeader ==
